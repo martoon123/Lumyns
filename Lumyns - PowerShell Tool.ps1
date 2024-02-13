@@ -1,9 +1,16 @@
-﻿#Allow Running Scripts
+﻿#---------------------- USER SIDE ----------------------
+#Allow Running Scripts
 #Set-ExecutionPolicy RemoteSigned
 
 #Disable Running Scripts
 #Set-ExecutionPolicy Restricted
 
+#Download the Script
+#Invoke-WebRequest https://github.com/martoon123/Lumyns/raw/main/Lumyns%20-%20PowerShell%20Tool.ps1 -OutFile Lumyns.ps1
+
+
+
+#---------------------- CODE SIDE ----------------------
 #Colors
 #Title = Magenta
 #Menu = Yellow
