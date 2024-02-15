@@ -30,9 +30,10 @@ while($true) {
     Write-Host "----------------------------------" -ForegroundColor DarkGray
     Write-Host ""
     Write-Host "General Menu" -ForegroundColor Magenta
-    Write-Host "[1] System Details - Installed Apps, Printers, Network Adapaters, etc..." -ForegroundColor Yellow
-    Write-Host "[2] Windows Update - Cleanup/Fix/Update." -ForegroundColor Yellow
-    Write-Host "[3] Windows Operation System - Repair/Cleanup/Check." -ForegroundColor Yellow
+    Write-Host "[1] New Installation - General Configuration and Application Installed" -ForegroundColor Yellow  
+    Write-Host "[2] System Details - Installed Apps, Printers, Network Adapaters, etc..." -ForegroundColor Yellow
+    Write-Host "[3] Windows Update - Cleanup/Fix/Update." -ForegroundColor Yellow
+    Write-Host "[4] Windows Operation System - Repair/Cleanup/Check." -ForegroundColor Yellow
     Write-Host "[0] Exit" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "Nervio Menu" -ForegroundColor Magenta
@@ -52,7 +53,35 @@ while($true) {
             Write-Host "Thank you, see you soon!"
             Exit
         } 
-        {($_ -eq "1")} {          
+        1 { 
+            Write-Host "Set Country/Region to Hebrew (Israel)" -ForegroundColor Red
+            Set-WinSystemLocale he-IL
+
+            Write-Host "Set Time Zone to Israel" -ForegroundColor Red
+            Set-TimeZone -Id "Israel Standard Time"
+            
+            Write-Host "Set Languages Hebrew and English (Default)" -ForegroundColor Red
+            Set-WinUserLanguageList en-US,he-IL -Force
+
+            Write-Host "Set Display Language" -ForegroundColor Red
+            Set-WinUILanguageOverride -Language en-US
+
+            Write-Host "Download and update Microsoft Store Library" -ForegroundColor Red
+            start ms-windows-store://downloadsandupdates
+            $(Write-Host "Press any key to continue..." -ForegroundColor Green -NoNewLine; Read-Host)
+
+            Write-Host "Make sure that the winget link is: https://cdn.winget.microsoft.com/cache" -ForegroundColor Red
+            winget source list
+            $(Write-Host "Press any key to continue..." -ForegroundColor Green -NoNewLine; Read-Host)
+
+            Write-Host "Installing all packages..." -ForegroundColor Red
+            winget install 9WZDNCRD29V9 --source msstore --silent #Install Office 365 (Office) throught Microsoft Store
+            winget install Google.Chrome --source winget --silent
+            winget install Notepad++.Notepad++ --source winget --silent
+            winget install 7zip.7zip --source winget --silent
+            Write-Host "The process is completed!" -ForegroundColor Cyan
+        } 
+        {($_ -eq "2")} {          
             systeminfo > Systeminfo.txt
             #List of Installed Softwares
             wmic /output:InstalledSoftwareList.txt product get name,version
@@ -68,7 +97,7 @@ while($true) {
             ipconfig /all >> IPConfig.txt
             Write-Host "The process is completed!" -ForegroundColor Cyan
         }
-        2 {
+        3 {
             Write-Host "Stop Windows Update Process" -ForegroundColor Red
             net stop wuauserv
             Write-Host "Clean Windows Update Folder" -ForegroundColor Red
@@ -88,7 +117,7 @@ while($true) {
             wuauclt /detectnow
             Write-Host "The process is completed!" -ForegroundColor Cyan
         }
-        3 {
+        4 {
             Write-Host "Repair Windows 10 Using CMD [with SFC Command]" -ForegroundColor Red
             sfc /scannow 
             Write-Host "Check if there are corruptions or not." -ForegroundColor Red
