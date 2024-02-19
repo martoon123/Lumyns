@@ -81,6 +81,16 @@ while($true) {
             winget source list
             $(Write-Host "Press any key to continue..." -ForegroundColor Green -NoNewLine; Read-Host)
 
+            $deviceType = $(Write-Host "Enter your device Type (Lenovo, Dell): " -ForegroundColor Green -NoNewLine; Read-Host)
+
+            switch($deviceType) { 
+                "Lenovo" {
+                    winget install "Lenovo Vantage" --source=msstore --accept-package-agreements --accept-source-agreements
+                }
+                "Dell" {
+                    winget install -e --id Dell.CommandUpdate
+                }
+            }
             Write-Host "Installing all packages..." -ForegroundColor Red
             winget install 9WZDNCRD29V9 --source msstore --silent #Install Office 365 (Office) throught Microsoft Store
             winget install Google.Chrome --source winget --silent
