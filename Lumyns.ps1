@@ -3,15 +3,15 @@
 #SHORT URL: http://tinyurl.com/lumynsps
 
 #Allow Running Scripts
-#Set-ExecutionPolicy RemoteSigned
-#Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+#[OLDER]: Set-ExecutionPolicy RemoteSigned
+#[NEWER]: Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
 #Download the Script
 #Invoke-WebRequest https://github.com/martoon123/Lumyns/raw/main/Lumyns.ps1 -OutFile Lumyns.ps1
 
 #Disable Running Scripts
-#Set-ExecutionPolicy Restricted
-
+#[OLDER]: Set-ExecutionPolicy Restricted
+#[NEWER]: Set-ExecutionPolicy -Scope Process -ExecutionPolicy Restricted
 
 
 #---------------------- CODE SIDE ----------------------
@@ -55,7 +55,8 @@ while($true) {
     switch($menu) { 
         0 { 
             Write-Host "Disabled running scripts for your protection!" -ForegroundColor Red
-            Set-ExecutionPolicy Restricted
+            Set-ExecutionPolicy Restricted #OLDER
+            Set-ExecutionPolicy -Scope Process -ExecutionPolicy Restricted #NEWER
             Write-Host "Thank you, see you soon!" -ForegroundColor Cyan     
             Exit
         } 
