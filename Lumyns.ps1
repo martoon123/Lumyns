@@ -1,9 +1,12 @@
 ﻿#---------------------- USER SIDE ----------------------
+
+#SHORT URL: http://tinyurl.com/lumynsps
+
 #Allow Running Scripts
 #Set-ExecutionPolicy RemoteSigned
 
 #Download the Script
-#Invoke-WebRequest https://github.com/martoon123/Lumyns/raw/main/Lumyns%20-%20PowerShell%20Tool.ps1 -OutFile Lumyns.ps1
+#Invoke-WebRequest https://github.com/martoon123/Lumyns/raw/main/Lumyns.ps1 -OutFile Lumyns.ps1
 
 #Disable Running Scripts
 #Set-ExecutionPolicy Restricted
