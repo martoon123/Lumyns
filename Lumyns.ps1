@@ -92,11 +92,11 @@ while($true) {
                 }
             }
             Write-Host "Installing all packages..." -ForegroundColor Red
-            winget install 9WZDNCRD29V9 --source msstore --silent #Install Office 365 (Office) throught Microsoft Store
             winget install Google.Chrome --source winget --silent
             winget install Notepad++.Notepad++ --source winget --silent
             winget install 7zip.7zip --source winget --silent
-            Write-Host "The process is completed!" -ForegroundColor Cyan
+            winget install 9WZDNCRD29V9 --source msstore --silent #Install Office 365 (Office) throught Microsoft Store
+            $(Write-Host "The process is completed, press enter to continue!" -ForegroundColor Cyan -NoNewLine; Read-Host)
         } 
         {($_ -eq "2")} {          
             systeminfo > Systeminfo.txt
@@ -112,7 +112,7 @@ while($true) {
             #Print IPConfig Command
             echo "------------------------------- ipconfig /all -------------------------------" >> IPConfig.txt
             ipconfig /all >> IPConfig.txt
-            Write-Host "The process is completed!" -ForegroundColor Cyan
+            $(Write-Host "The process is completed, press enter to continue!" -ForegroundColor Cyan -NoNewLine; Read-Host)
         }
         3 {
             Write-Host "Stop Windows Update Process" -ForegroundColor Red
@@ -132,7 +132,7 @@ while($true) {
             Timeout /T 60
             Write-Host "Windows Update - Detect Updates Now" -ForegroundColor Red
             wuauclt /detectnow
-            Write-Host "The process is completed!" -ForegroundColor Cyan
+            $(Write-Host "The process is completed, press enter to continue!" -ForegroundColor Cyan -NoNewLine; Read-Host)
         }
         4 {
             Write-Host "Repair Windows 10 Using CMD [with SFC Command]" -ForegroundColor Red
@@ -143,7 +143,7 @@ while($true) {
             DISM /Online /Cleanup-Image /ScanHealth
             Write-Host "Fix Windows image corruptions." -ForegroundColor Red
             DISM /Online /Cleanup-Image /RestoreHealth /Source:repairSource\install.wim
-            Write-Host "The process is completed!" -ForegroundColor Cyan
+            $(Write-Host "The process is completed, press enter to continue!" -ForegroundColor Cyan -NoNewLine; Read-Host)
         }
         "nerv-all" {
             Write-Host "Set Country/Region to Hebrew (Israel)" -ForegroundColor Red
@@ -175,7 +175,7 @@ while($true) {
             winget install 7zip.7zip --source winget --silent
             winget install ShareX.ShareX --source winget --silent
             winget install Microsoft.Teams --source winget --silent
-            Write-Host "The process is completed!" -ForegroundColor Cyan
+            $(Write-Host "The process is completed, press enter to continue!" -ForegroundColor Cyan -NoNewLine; Read-Host)
         }
         "nerv-nas" {
             Write-Host "Installing all packages..." -ForegroundColor Red
@@ -186,7 +186,7 @@ while($true) {
             winget install MongoDB.Shell	--source winget --silent
             winget install MongoDB.Compass.Full	--source winget --silent
             winget install Docker.DockerDesktop	--source winget --silent
-            Write-Host "The process is completed!" -ForegroundColor Cyan
+            $(Write-Host "The process is completed, press enter to continue!" -ForegroundColor Cyan -NoNewLine; Read-Host)
         }
         default { 
             "You entered nothing." 
