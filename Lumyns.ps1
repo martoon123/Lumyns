@@ -4,6 +4,7 @@
 
 #Allow Running Scripts
 #Set-ExecutionPolicy RemoteSigned
+#Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
 #Download the Script
 #Invoke-WebRequest https://github.com/martoon123/Lumyns/raw/main/Lumyns.ps1 -OutFile Lumyns.ps1
@@ -53,7 +54,9 @@ while($true) {
     Write-Host "----------------------------------" -ForegroundColor DarkGray
     switch($menu) { 
         0 { 
-            Write-Host "Thank you, see you soon!"
+            Write-Host "Disabled running scripts for your protection!" -ForegroundColor Red
+            Set-ExecutionPolicy Restricted
+            Write-Host "Thank you, see you soon!" -ForegroundColor Cyan     
             Exit
         } 
         1 { 
