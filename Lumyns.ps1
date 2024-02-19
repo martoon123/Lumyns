@@ -2,11 +2,11 @@
 #Allow Running Scripts
 #Set-ExecutionPolicy RemoteSigned
 
-#Disable Running Scripts
-#Set-ExecutionPolicy Restricted
-
 #Download the Script
 #Invoke-WebRequest https://github.com/martoon123/Lumyns/raw/main/Lumyns%20-%20PowerShell%20Tool.ps1 -OutFile Lumyns.ps1
+
+#Disable Running Scripts
+#Set-ExecutionPolicy Restricted
 
 
 
@@ -18,7 +18,7 @@
 #Seperators = DarkGray
 #EndOfProcess = Cyan
 
-$hostname = hostname
+Write-Host "Please run the tool as Administrator!" -ForegroundColor Red
 
 while($true) {
     Write-Host ""
