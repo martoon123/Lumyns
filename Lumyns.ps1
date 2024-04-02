@@ -38,7 +38,7 @@ function Softwares
 
 while($true) {
     Write-Host ""
-    Write-Host "Lumyns - IT PowerShell Tool" -ForegroundColor Magenta
+    Write-Host "Lumyns - IT PowerShell Tool [Version: 02.04.2024]" -ForegroundColor Magenta
     $pwd = Get-Location
     Write-Host "Working Location: " $pwd -ForegroundColor DarkGray
     Write-Host "----------------------------------" -ForegroundColor DarkGray
