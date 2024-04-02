@@ -24,6 +24,18 @@
 
 Write-Host "Please run the tool as Administrator!" -ForegroundColor Red
 
+function Softwares
+{
+    Write-Host "Install packages? (Chrome, Notepad++, 7zip)" -ForegroundColor Red 
+    $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
+    if($doORnot -eq "") {
+        Write-Host "Installing all packages..." -ForegroundColor Red
+        winget install Google.Chrome --source winget --silent
+        winget install Notepad++.Notepad++ --source winget --silent
+        winget install 7zip.7zip --source winget --silent
+    }
+}
+
 while($true) {
     Write-Host ""
     Write-Host "Lumyns - IT PowerShell Tool" -ForegroundColor Magenta
@@ -36,8 +48,8 @@ while($true) {
     Write-Host "General Menu" -ForegroundColor Magenta
     Write-Host "[1] New Installation - General Configuration and Application Installed" -ForegroundColor Yellow  
     Write-Host "[2] System Details - Installed Apps, Printers, Network Adapaters, etc..." -ForegroundColor Yellow
-    Write-Host "[3] Windows Update - Cleanup/Fix/Update." -ForegroundColor Yellow
-    Write-Host "[4] Windows Operation System - Repair/Cleanup/Check." -ForegroundColor Yellow
+    Write-Host "[3] Diagnose Operation System (Network Adapters, Microsoft Store, Disk Cleanup, Windows Updates, etc...)" -ForegroundColor Yellow
+    Write-Host "[4] Diagnose Operation System Image Files" -ForegroundColor Yellow
     Write-Host "[0] Exit" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "Nervio Menu" -ForegroundColor Magenta
@@ -97,7 +109,6 @@ while($true) {
 
                 Write-Host "Make sure that the winget link is: https://cdn.winget.microsoft.com/cache" -ForegroundColor Red
                 winget source list
-                $(Write-Host "Press any key to continue..." -ForegroundColor Green -NoNewLine; Read-Host)
             }
 
             Write-Host "Install device updating software?" -ForegroundColor Red 
@@ -145,28 +156,56 @@ while($true) {
             ipconfig /all >> IPConfig.txt
             $(Write-Host "The process is completed, press enter to continue!" -ForegroundColor Cyan -NoNewLine; Read-Host)
         }
-        3 {
-            Write-Host "Reseting Microsoft Store (Solves tons of issues!)" -ForegroundColor Red
-            wsreset.exe
-            $(Write-Host "Press any key to continue..." -ForegroundColor Green -NoNewLine; Read-Host)
+        3 { 
+            $doORnot = "";
 
-            Write-Host "Stop Windows Update Process" -ForegroundColor Red
-            net stop wuauserv
-            Write-Host "Clean Windows Update Folder" -ForegroundColor Red
-            #rmdir /s "C:\Windows\SoftwareDistribution\Download"
-            Remove-Item -LiteralPath "C:\Windows\SoftwareDistribution\Download" -Force -Recurse
-            Write-Host "Windows Update Cleanup" -ForegroundColor Red
-            cleanmgr /sageset:1 #Choose what to remove on Disk Cleanup
-            $(Write-Host "Press any key to continue..." -ForegroundColor Green -NoNewLine; Read-Host)
-            #Read-Host -Prompt "Press any key to continue" -ForegroundColor Green | Out-Null
-            cleanmgr /sagerun:1 #Force Disk Cleanup
-            $(Write-Host "Press any key to continue..." -ForegroundColor Green -NoNewLine; Read-Host)
-            Write-Host "Start Windows Update Process" -ForegroundColor Red
-            net start wuauserv
-            Write-Host "Timeout is for 60 seconds" -ForegroundColor Red
-            Timeout /T 60
-            Write-Host "Windows Update - Detect Updates Now" -ForegroundColor Red
+            Write-Host "Reset Network Adapters configurations?" -ForegroundColor Red 
+            $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
+            if($doORnot -eq "") {
+                netsh winsock reset
+                netsh int ip reset
+                ipconfig /release
+                ipconfig /renew
+                ipconfig /flushdns
+            }
+
+            Write-Host "Deep Disk Clean Up? (Serious)!" -ForegroundColor Red 
+            $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
+            if($doORnot -eq "") {
+                cleanmgr /sageset:1 #Choose what to remove on Disk Cleanup
+                cleanmgr /sagerun:1 #Force Disk Cleanup
+            }
+
+             Write-Host "Manually remove windows updates files from C:\Windows folder? (On your own responsibility!)" -ForegroundColor Red 
+            $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
+            if($doORnot -eq "") {
+                Write-Host "Stopping Windows Update Process." -ForegroundColor Red
+                net stop wuauserv
+                Write-Host "Cleaning Windows Update Folder" -ForegroundColor Red
+                Remove-Item -LiteralPath "C:\Windows\SoftwareDistribution\Download" -Force -Recurse
+                Write-Host "Starting Windows Update Process." -ForegroundColor Red
+                net start wuauserv
+            }
+            
+            Write-Host "Reset Microsoft Store? (Solves tons of issues!)" -ForegroundColor Red 
+            $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
+            if($doORnot -eq "") {
+                wsreset.exe
+            }
+
+            Write-Host "Update Microsoft Store Library?" -ForegroundColor Red 
+            $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
+            if($doORnot -eq "") {
+                Write-Host "Download and update Microsoft Store Library" -ForegroundColor Red
+                start ms-windows-store://downloadsandupdates
+                Write-Host "Make sure that the winget link is: https://cdn.winget.microsoft.com/cache" -ForegroundColor Red
+                winget source list
+                $(Write-Host "Press any key to continue..." -ForegroundColor Green -NoNewLine; Read-Host)
+            }
+
+            Write-Host "Detecting Windows Updates." -ForegroundColor Red
             wuauclt /detectnow
+
             $(Write-Host "The process is completed, press enter to continue!" -ForegroundColor Cyan -NoNewLine; Read-Host)
         }
         4 {
