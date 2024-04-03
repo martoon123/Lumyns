@@ -173,7 +173,9 @@ while($true) {
             $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
             if($doORnot -eq "") {
                 cleanmgr /sageset:1 #Choose what to remove on Disk Cleanup
+                $(Write-Host "Press any key to continue..." -ForegroundColor Green -NoNewLine; Read-Host)
                 cleanmgr /sagerun:1 #Force Disk Cleanup
+                $(Write-Host "Press any key to continue..." -ForegroundColor Green -NoNewLine; Read-Host)
             }
 
              Write-Host "Manually remove windows updates files from C:\Windows folder? (On your own responsibility!)" -ForegroundColor Red 
