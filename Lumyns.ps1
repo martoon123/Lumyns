@@ -33,72 +33,72 @@ function ExitProgram {
 
 # General Section
 function InstallPackages {
-            $doORnot = "";
+    $doORnot = "";
 
-            Write-Host "Create Lumyns Administrator account with generated password?" -ForegroundColor Red 
-            $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
-            if($doORnot -eq "") {
-                $RandomString = -join ((48..57) + (65..90) + (97..122) | Get-Random -Count 10 | ForEach-Object {[char]$_})
-                Write-Output "Generated Password: $RandomString (Make sure to save, modify, or use LAPS!)"
-                net user /add Lumyns $RandomString
-                net localgroup administrators Lumyns /add
-            }
+    Write-Host "Create Lumyns Administrator account with generated password?" -ForegroundColor Red 
+    $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
+    if($doORnot -eq "") {
+        $RandomString = -join ((48..57) + (65..90) + (97..122) | Get-Random -Count 10 | ForEach-Object {[char]$_})
+        Write-Output "Generated Password: $RandomString (Make sure to save, modify, or use LAPS!)"
+        net user /add Lumyns $RandomString
+        net localgroup administrators Lumyns /add
+    }
 
-            Write-Host "Set Country/Region, Time Zone, Languages, Display Language to Hebrew and Israel?" -ForegroundColor Red 
-            $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
-            if($doORnot -eq "") {
-                Write-Host "Set Country/Region to Hebrew (Israel)" -ForegroundColor Red
-                Set-WinSystemLocale he-IL
+    Write-Host "Set Country/Region, Time Zone, Languages, Display Language to Hebrew and Israel?" -ForegroundColor Red 
+    $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
+    if($doORnot -eq "") {
+        Write-Host "Set Country/Region to Hebrew (Israel)" -ForegroundColor Red
+        Set-WinSystemLocale he-IL
 
-                Write-Host "Set Time Zone to Israel" -ForegroundColor Red
-                Set-TimeZone -Id "Israel Standard Time"
+        Write-Host "Set Time Zone to Israel" -ForegroundColor Red
+        Set-TimeZone -Id "Israel Standard Time"
             
-                Write-Host "Set Languages Hebrew and English (Default)" -ForegroundColor Red
-                Set-WinUserLanguageList en-US,he-IL -Force
+        Write-Host "Set Languages Hebrew and English (Default)" -ForegroundColor Red
+        Set-WinUserLanguageList en-US,he-IL -Force
 
-                Write-Host "Set Display Language" -ForegroundColor Red
-                Set-WinUILanguageOverride -Language en-US
-            }
+        Write-Host "Set Display Language" -ForegroundColor Red
+        Set-WinUILanguageOverride -Language en-US
+    }
 
-            Write-Host "Download and Update Microsoft Store Library?" -ForegroundColor Red 
-            $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
-            if($doORnot -eq "") {
-                Write-Host "Download and update Microsoft Store Library" -ForegroundColor Red
-                start ms-windows-store://downloadsandupdates
-                $(Write-Host "Press any key to continue..." -ForegroundColor Green -NoNewLine; Read-Host)
+    Write-Host "Download and Update Microsoft Store Library?" -ForegroundColor Red 
+    $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
+    if($doORnot -eq "") {
+        Write-Host "Download and update Microsoft Store Library" -ForegroundColor Red
+        start ms-windows-store://downloadsandupdates
+        $(Write-Host "Press any key to continue..." -ForegroundColor Green -NoNewLine; Read-Host)
 
-                Write-Host "Make sure that the winget link is: https://cdn.winget.microsoft.com/cache" -ForegroundColor Red
-                winget source list
-            }
+        Write-Host "Make sure that the winget link is: https://cdn.winget.microsoft.com/cache" -ForegroundColor Red
+        winget source list
+    }
 
-            Write-Host "Install device updating software?" -ForegroundColor Red 
-            $doORnot = $(Write-Host "Enter your device Type (Lenovo, Dell) or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
-            switch($doORnot) { 
-                "Lenovo" {
-                    winget install "Lenovo Vantage" --source=msstore --accept-package-agreements --accept-source-agreements
-                }
-                "Dell" {
-                    winget install -e --id Dell.CommandUpdate
-                }
-            }
+    Write-Host "Install device updating software?" -ForegroundColor Red 
+    $doORnot = $(Write-Host "Enter your device Type (Lenovo, Dell) or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
+    switch($doORnot) { 
+        "Lenovo" {
+            winget install "Lenovo Vantage" --source=msstore --accept-package-agreements --accept-source-agreements
+        }
+        "Dell" {
+            winget install -e --id Dell.CommandUpdate
+        }
+    }
 
-            Write-Host "Install packages? (Chrome, Notepad++, 7zip)" -ForegroundColor Red 
-            $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
-            if($doORnot -eq "") {
-                Write-Host "Installing all packages..." -ForegroundColor Red
-                winget install Google.Chrome --source winget --silent
-                winget install Notepad++.Notepad++ --source winget --silent
-                winget install 7zip.7zip --source winget --silent
-            }
+    Write-Host "Install packages? (Chrome, Notepad++, 7zip)" -ForegroundColor Red 
+    $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
+    if($doORnot -eq "") {
+        Write-Host "Installing all packages..." -ForegroundColor Red
+        winget install Google.Chrome --source winget --silent
+        winget install Notepad++.Notepad++ --source winget --silent
+        winget install 7zip.7zip --source winget --silent
+    }
 
-            Write-Host "Install Microsoft Office?" -ForegroundColor Red 
-            $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
-            if($doORnot -eq "") { 
-                Write-Host "Installing Microsoft Office (Outlook, Word, Excel, PowerPoint, Teams, To Do, Teams)" -ForegroundColor Red
-                winget install --id Microsoft.Office
-            }
+    Write-Host "Install Microsoft Office?" -ForegroundColor Red 
+    $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
+    if($doORnot -eq "") { 
+        Write-Host "Installing Microsoft Office (Outlook, Word, Excel, PowerPoint, Teams, To Do, Teams)" -ForegroundColor Red
+        winget install --id Microsoft.Office
+    }
 
-            $(Write-Host "The process is completed, press enter to continue!" -ForegroundColor Cyan -NoNewLine; Read-Host)
+    $(Write-Host "The process is completed, press enter to continue!" -ForegroundColor Cyan -NoNewLine; Read-Host)
 }
 function SystemDetails {
    systeminfo > Systeminfo.txt
@@ -170,14 +170,15 @@ function DiagnoseOperationSystem {
     $(Write-Host "The process is completed, press enter to continue!" -ForegroundColor Cyan -NoNewLine; Read-Host)
 }
 function DiagnoseOperationSystemImage {
-  Write-Host "Repair Windows 10 Using CMD [with SFC Command]" -ForegroundColor Red
+    # https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/repair-a-windows-image?view=windows-11
+    Write-Host "Repair Windows 10 Using CMD [with SFC Command]" -ForegroundColor Red
     sfc /scannow 
     Write-Host "Check if there are corruptions or not." -ForegroundColor Red
     DISM /Online /Cleanup-Image /CheckHealth
     Write-Host "Scan the corruptions of Windows images." -ForegroundColor Red
     DISM /Online /Cleanup-Image /ScanHealth
     Write-Host "Fix Windows image corruptions." -ForegroundColor Red
-    DISM /Online /Cleanup-Image /RestoreHealth /Source:repairSource\install.wim
+    DISM /Online /Cleanup-Image /RestoreHealth
     $(Write-Host "The process is completed, press enter to continue!" -ForegroundColor Cyan -NoNewLine; Read-Host)
 }
 
