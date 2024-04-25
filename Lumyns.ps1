@@ -229,12 +229,11 @@ function NervioNas {
 
 # Menu and Loop
 function DisplayMenu {
-    
     while($true) {
         Clear-Host
         Write-Host "Please run the tool as Administrator!" -ForegroundColor Red
         Write-Host ""
-        Write-Host "Lumyns - IT PowerShell Tool [Version: 02.04.2024]" -ForegroundColor Magenta
+        Write-Host "Lumyns - IT PowerShell Tool [Version: 25.04.2024]" -ForegroundColor Magenta
         $pwd = Get-Location
         Write-Host "Working Location: " $pwd -ForegroundColor DarkGray
         Write-Host "----------------------------------" -ForegroundColor DarkGray
