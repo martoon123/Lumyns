@@ -126,6 +126,7 @@ function DiagnoseOperationSystem {
         ipconfig /release
         ipconfig /renew
         ipconfig /flushdns
+        ipconfig /registerdns
     }
 
     Write-Host "Deep Disk Clean Up? (Serious)!" -ForegroundColor Red 
