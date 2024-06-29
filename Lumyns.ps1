@@ -100,6 +100,8 @@ function InstallPackages {
 
     $(Write-Host "The process is completed, press enter to continue!" -ForegroundColor Cyan -NoNewLine; Read-Host)
 }
+
+#Section for Printing System Details
 function SystemDetails {
    systeminfo > Systeminfo.txt
     #List of Installed Softwares
@@ -116,6 +118,8 @@ function SystemDetails {
     ipconfig /all >> IPConfig.txt
     $(Write-Host "The process is completed, press enter to continue!" -ForegroundColor Cyan -NoNewLine; Read-Host)
 }
+
+#Section for Diagnosing OS configurations and Cleanups
 function DiagnoseOperationSystem {
     $doORnot = "";
     Write-Host "Reset Network Adapters configurations?" -ForegroundColor Red 
@@ -170,6 +174,8 @@ function DiagnoseOperationSystem {
 
     $(Write-Host "The process is completed, press enter to continue!" -ForegroundColor Cyan -NoNewLine; Read-Host)
 }
+
+#Section for Diagnosing and Repairing OS Image
 function DiagnoseOperationSystemImage {
     # https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/repair-a-windows-image?view=windows-11
     Write-Host "Repair Windows 10 Using CMD [with SFC Command]" -ForegroundColor Red
@@ -183,7 +189,7 @@ function DiagnoseOperationSystemImage {
     $(Write-Host "The process is completed, press enter to continue!" -ForegroundColor Cyan -NoNewLine; Read-Host)
 }
 
-# Nervio Section
+#Nervio General Section
 function NervioAll {
     Write-Host "Set Country/Region to Hebrew (Israel)" -ForegroundColor Red
     Set-WinSystemLocale he-IL
@@ -216,6 +222,8 @@ function NervioAll {
     winget install Microsoft.Teams --source winget --silent
     $(Write-Host "The process is completed, press enter to continue!" -ForegroundColor Cyan -NoNewLine; Read-Host)
 }
+
+#Nervio NAS Section
 function NervioNas {
     Write-Host "Installing all packages..." -ForegroundColor Red
     winget install Microsoft.VCRedist.2015+.x64	--source winget --silent
