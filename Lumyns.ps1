@@ -177,7 +177,7 @@ function DiagnoseOperationSystem {
 
 #Section for Diagnosing and Repairing OS Image
 function DiagnoseOperationSystemImage {
-    # https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/repair-a-windows-image?view=windows-11
+	# https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/repair-a-windows-image?view=windows-11
     Write-Host "Repair Windows 10 Using CMD [with SFC Command]" -ForegroundColor Red
     sfc /scannow 
     Write-Host "Check if there are corruptions or not." -ForegroundColor Red
@@ -187,6 +187,12 @@ function DiagnoseOperationSystemImage {
     Write-Host "Fix Windows image corruptions." -ForegroundColor Red
     DISM /Online /Cleanup-Image /RestoreHealth
     $(Write-Host "The process is completed, press enter to continue!" -ForegroundColor Cyan -NoNewLine; Read-Host)
+	
+	Write-Host "Run check disk and fix? This might happen on the next restart." -ForegroundColor Red 
+    $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
+    if($doORnot -eq "") {
+		chkdsk /f
+	}
 }
 
 #Nervio General Section
