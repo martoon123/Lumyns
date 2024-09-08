@@ -127,6 +127,8 @@ function DiagnoseOperationSystem {
     if($doORnot -eq "") {
         netsh winsock reset
         netsh int ip reset
+        netsh interface ipv4 show neighbors #Show ARP List
+        netsh interface ipv4 delete neighbors #Clear ARP List
         ipconfig /release
         ipconfig /renew
         ipconfig /flushdns
