@@ -128,7 +128,7 @@ function DiagnoseOperationSystem {
         netsh winsock reset
         netsh int ip reset
         netsh interface ipv4 show neighbors #Show ARP List
-        netsh interface ipv4 delete neighbors #Clear ARP List
+        netsh interface ipv4 delete neighbors #Clear ARP List - Ideal for servers
         ipconfig /release
         ipconfig /renew
         ipconfig /flushdns
