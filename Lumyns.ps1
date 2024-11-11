@@ -95,7 +95,7 @@ function InstallPackages {
     $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
     if($doORnot -eq "") { 
         Write-Host "Installing Microsoft Office (Outlook, Word, Excel, PowerPoint, Teams, To Do, Teams)" -ForegroundColor Red
-        winget install --id Microsoft.Office
+        winget install --id Microsoft.Office --accept-source-agreements
     }
 
     $(Write-Host "The process is completed, press enter to continue!" -ForegroundColor Cyan -NoNewLine; Read-Host)
@@ -193,7 +193,7 @@ function DiagnoseOperationSystemImage {
 	Write-Host "Run check disk and fix? This might happen on the next restart." -ForegroundColor Red 
     $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
     if($doORnot -eq "") {
-		chkdsk /f
+		echo Y | chkdsk /f
 	}
 }
 
