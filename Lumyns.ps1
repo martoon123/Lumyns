@@ -2,17 +2,14 @@
 
 # SHORT URL: http://tinyurl.com/lumynsps
 
-# Allow Running Scripts
-# [OLDER]: Set-ExecutionPolicy RemoteSigned
-# [NEWER]: Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-
 # Download the Script
 # Invoke-WebRequest https://github.com/martoon123/Lumyns/raw/main/Lumyns.ps1 -OutFile Lumyns.ps1
 
-# Disable Running Scripts
-# [OLDER]: Set-ExecutionPolicy Restricted
-# [NEWER]: Set-ExecutionPolicy -Scope Process -ExecutionPolicy Restricted
+# Allow Running Scripts
+# [NEWER]: Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
+# Disable Running Scripts
+# [NEWER]: Set-ExecutionPolicy -Scope Process -ExecutionPolicy Restricted
 
 #---------------------- CODE SIDE ----------------------
 # Colors
@@ -170,6 +167,14 @@ function DiagnoseOperationSystem {
         winget source list
         $(Write-Host "Press any key to continue..." -ForegroundColor Green -NoNewLine; Read-Host)
     }
+    
+    winget upgrade
+    Write-Host "Upgrade all the applications using winget?" -ForegroundColor Red 
+    $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
+    if($doORnot -eq "") {
+        winget upgrade --all
+        $(Write-Host "Press any key to continue..." -ForegroundColor Green -NoNewLine; Read-Host)
+    }
 
     Write-Host "Detecting Windows Updates." -ForegroundColor Red
     wuauclt /detectnow
@@ -250,7 +255,7 @@ function DisplayMenu {
         Clear-Host
         Write-Host "Please run the tool as Administrator!" -ForegroundColor Red
         Write-Host ""
-        Write-Host "Lumyns - IT PowerShell Tool [Version: 25.04.2024]" -ForegroundColor Magenta
+        Write-Host "Lumyns - IT PowerShell Tool [Version: 04.12.2024]" -ForegroundColor Magenta
         $pwd = Get-Location
         Write-Host "Working Location: " $pwd -ForegroundColor DarkGray
         Write-Host "----------------------------------" -ForegroundColor DarkGray
