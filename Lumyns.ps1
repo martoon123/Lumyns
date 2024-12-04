@@ -168,11 +168,12 @@ function DiagnoseOperationSystem {
         $(Write-Host "Press any key to continue..." -ForegroundColor Green -NoNewLine; Read-Host)
     }
     
-    winget upgrade
+    echo Y | winget upgrade
     Write-Host "Upgrade all the applications using winget?" -ForegroundColor Red 
     $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
     if($doORnot -eq "") {
-        winget upgrade --all
+        echo Y | winget upgrade --all
+        echo Y | winget upgrade
         $(Write-Host "Press any key to continue..." -ForegroundColor Green -NoNewLine; Read-Host)
     }
 
