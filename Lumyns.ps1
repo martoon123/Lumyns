@@ -141,7 +141,7 @@ function DiagnoseOperationSystem {
         $(Write-Host "Press any key to continue..." -ForegroundColor Green -NoNewLine; Read-Host)
     }
 
-        Write-Host "Manually remove windows updates files from C:\Windows folder? (On your own responsibility!)" -ForegroundColor Red 
+    Write-Host "Manually remove windows updates files from C:\Windows folder? (On your own responsibility!)" -ForegroundColor Red 
     $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
     if($doORnot -eq "") {
         Write-Host "Stopping Windows Update Process." -ForegroundColor Red
@@ -151,7 +151,16 @@ function DiagnoseOperationSystem {
         Write-Host "Starting Windows Update Process." -ForegroundColor Red
         net start wuauserv
     }
-            
+     
+    Write-Host "Clean Temp folders? both C:\Windows\Temp and %USERPROFILE%\AppData\Local\Temp (On your own responsibility!)" -ForegroundColor Red 
+    $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
+    if($doORnot -eq "") {
+        Write-Host "Cleaning Windows Temp Folder" -ForegroundColor Red
+        Remove-Item -LiteralPath "C:\Windows\Temp" -Force -Recurse
+        Write-Host "Cleaning User Profile Temp Folder" -ForegroundColor Red
+        Remove-Item -LiteralPath "%USERPROFILE%\AppData\Local\Temp" -Force -Recurse
+    }
+
     Write-Host "Reset Microsoft Store? (Solves tons of issues!)" -ForegroundColor Red 
     $doORnot = $(Write-Host "Press any key to continue or 'x' to skip... Enter your choice: " -ForegroundColor Green -NoNewLine; Read-Host)
     if($doORnot -eq "") {
