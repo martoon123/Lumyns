@@ -220,7 +220,15 @@ function Test-NetworkPing {
         [int]$PingCount = 5           # Number of ping attempts
     )
 
-    Write-Host "`nTesting connection to: $TargetIP"
+    # Define log file path in the same location as the script
+    $LogFile = "$PSScriptRoot\network_ping_log.txt"
+
+    $LogMessages = @()
+
+    $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $TestMessage = "$Timestamp - Testing connection to: $TargetIP"
+    Write-Host $TestMessage
+    $LogMessages += $TestMessage
 
     $PingResult = Test-Connection -ComputerName $TargetIP -Count $PingCount -BufferSize $MaxPacketSize -ErrorAction SilentlyContinue
         
@@ -230,37 +238,65 @@ function Test-NetworkPing {
         $AvgLatency = ($PingResult | Measure-Object -Property ResponseTime -Average).Average
 
         # Conditional formatting for Packet Loss output
+        $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
         if ($LostPackets -gt 0) {
-            Write-Host "Packet Loss:         ❌ $LostPackets out of $PingCount" -ForegroundColor Red
+            $PacketMessage = "$Timestamp - Packet Loss: ❌ $LostPackets out of $PingCount"
+            Write-Host $PacketMessage -ForegroundColor Red
         } else {
-            Write-Host "Packet Loss:         ✅ $LostPackets out of $PingCount" -ForegroundColor Green
+            $PacketMessage = "$Timestamp - Packet Loss: ✅ $LostPackets out of $PingCount"
+            Write-Host $PacketMessage -ForegroundColor Green
         }
+        $LogMessages += $PacketMessage
 
         # Conditional formatting for Latency output
+        $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
         if ($AvgLatency -le 1) {
-            Write-Host "Average Latency:     ✅ $AvgLatency ms (Excellent)" -ForegroundColor Green
+            $LatencyMessage = "$Timestamp - Average Latency: ✅ $AvgLatency ms (Excellent)"
+            Write-Host $LatencyMessage -ForegroundColor Green
         } elseif ($AvgLatency -gt 1 -and $AvgLatency -le 5) {
-            Write-Host "Average Latency:     ✅ $AvgLatency ms (Acceptable)" -ForegroundColor Cyan
+            $LatencyMessage = "$Timestamp - Average Latency: ✅ $AvgLatency ms (Acceptable)"
+            Write-Host $LatencyMessage -ForegroundColor Cyan
         } elseif ($AvgLatency -gt 5 -and $AvgLatency -le 20) {
-            Write-Host "Average Latency:     ❌ $AvgLatency ms (Poor)" -ForegroundColor Yellow
+            $LatencyMessage = "$Timestamp - Average Latency: ❌ $AvgLatency ms (Poor)"
+            Write-Host $LatencyMessage -ForegroundColor Yellow
         } else {
-            Write-Host "Average Latency:     ❌ $AvgLatency ms (Critical)" -ForegroundColor Red
+            $LatencyMessage = "$Timestamp - Average Latency: ❌ $AvgLatency ms (Critical)"
+            Write-Host $LatencyMessage -ForegroundColor Red
         }
+        $LogMessages += $LatencyMessage
     } else {
-        Write-Host "❌ Failed to ping $TargetIP" -ForegroundColor Red
+        $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+        $FailMessage = "$Timestamp - ❌ Failed to ping $TargetIP"
+        Write-Host $FailMessage -ForegroundColor Red
+        $LogMessages += $FailMessage
     }
+
+    # Save all messages to the log file
+    $LogMessages | Out-File -Append -FilePath $LogFile
 }
 
 function Test-CPUUsage {
+    # Define log file path in the same location as the script
+    $LogFile = "$PSScriptRoot\cpu_usage_log.txt"
+
+    $LogMessages = @()
+
+    # Get timestamp
+    $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+
     # Get total CPU usage
     $CPUUsage = (Get-Counter '\Processor(_Total)\% Processor Time').CounterSamples.CookedValue
     $CPUUsage = [math]::Round($CPUUsage)
 
+    # Format CPU usage message with timestamp
     if ($CPUUsage -gt 75) {
-        Write-Host "`nCPU Usage:           ❌ $CPUUsage% (Above 75%)" -ForegroundColor Red
+        $CpuMessage = "$Timestamp - CPU Usage: ❌ $CPUUsage% (Above 75%)"
+        Write-Host $CpuMessage -ForegroundColor Red
     } else {
-        Write-Host "`nCPU Usage:           ✅ $CPUUsage% (Below 75%)" -ForegroundColor Green
+        $CpuMessage = "$Timestamp - CPU Usage: ✅ $CPUUsage% (Below 75%)"
+        Write-Host $CpuMessage -ForegroundColor Green
     }
+    $LogMessages += $CpuMessage
 
     # Get total CPU time for all active processes
     $TotalProcessorTime = (Get-Process | Measure-Object -Property CPU -Sum).Sum
@@ -272,21 +308,29 @@ function Test-CPUUsage {
         "$($_.ProcessName): $ProcessUsage%"
     }) -join " | "
 
-    Write-Host "Top Processes: $ProcessLine" -ForegroundColor Magenta
+    # Add timestamp to process message
+    $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $ProcessMessage = "$Timestamp - Top Processes: $ProcessLine"
+    Write-Host $ProcessMessage -ForegroundColor Magenta
+    $LogMessages += $ProcessMessage
+
+    # Save all messages to the log file in the same folder as the script
+    $LogMessages | Out-File -Append -FilePath $LogFile
 }
 
 #Section for Log Performance
 function LogPerformance {
 
     # 3. User-Inputted IP
-    $UserIP = Read-Host "Enter the Server IP Address"
+    $UserIP = $(Write-Host "Enter the Server IP Address: " -ForegroundColor Green -NoNewLine; Read-Host)
+
     Test-NetworkPing -TargetIP $UserIP
 
     while ($true) {
         Test-NetworkPing    # Test default gateway
         Test-NetworkPing -TargetIP $UserIP
         Test-CPUUsage
-        Start-Sleep -Seconds 1  # Adjust interval as needed
+        #Start-Sleep -Seconds 1  # Adjust interval as needed
     }
 }
 
