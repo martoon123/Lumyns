@@ -212,64 +212,160 @@ function DiagnoseOperationSystemImage {
 	}
 }
 
-#Nervio General Section
-function NervioAll {
-    Write-Host "Set Country/Region to Hebrew (Israel)" -ForegroundColor Red
-    Set-WinSystemLocale he-IL
+function Test-NetworkPing {
+    param (
+        [string]$TargetIP = (Get-NetIPConfiguration | Where-Object { $_.IPv4DefaultGateway -ne $null } | 
+                             Select-Object -ExpandProperty IPv4DefaultGateway | Select-Object -First 1).NextHop,
+        [int]$MaxPacketSize = 65500,  # Maximum allowed packet size for ICMP
+        [int]$PingCount = 5           # Number of ping attempts
+    )
 
-    Write-Host "Set Time Zone to Israel" -ForegroundColor Red
-    Set-TimeZone -Id "Israel Standard Time"
-            
-    Write-Host "Set Languages Hebrew and English (Default)" -ForegroundColor Red
-    Set-WinUserLanguageList en-US,he-IL -Force
+    Write-Host "`nTesting connection to: $TargetIP"
 
-    Write-Host "Set Display Language" -ForegroundColor Red
-    Set-WinUILanguageOverride -Language en-US
+    $PingResult = Test-Connection -ComputerName $TargetIP -Count $PingCount -BufferSize $MaxPacketSize -ErrorAction SilentlyContinue
+        
+    if ($PingResult) {
+        $ReceivedPackets = ($PingResult | Where-Object { $_.ResponseTime -ne $null }).Count
+        $LostPackets = $PingCount - $ReceivedPackets
+        $AvgLatency = ($PingResult | Measure-Object -Property ResponseTime -Average).Average
 
-    Write-Host "Download and update Microsoft Store Library" -ForegroundColor Red
-    start ms-windows-store://downloadsandupdates
-    $(Write-Host "Press any key to continue..." -ForegroundColor Green -NoNewLine; Read-Host)
+        # Conditional formatting for Packet Loss output
+        if ($LostPackets -gt 0) {
+            Write-Host "Packet Loss:         ❌ $LostPackets out of $PingCount" -ForegroundColor Red
+        } else {
+            Write-Host "Packet Loss:         ✅ $LostPackets out of $PingCount" -ForegroundColor Green
+        }
 
-    Write-Host "Make sure that the winget link is: https://cdn.winget.microsoft.com/cache" -ForegroundColor Red
-    winget source list
-    $(Write-Host "Press any key to continue..." -ForegroundColor Green -NoNewLine; Read-Host)
-
-    Write-Host "Installing all packages..." -ForegroundColor Red
-    winget install Microsoft.PowerShell --source winget --silent
-    winget install Microsoft.WindowsTerminal --source winget --silent
-    winget install --id=RustDesk.RustDesk --exact --source winget --silent
-    winget install Microsoft.PowerToys --source winget --silent
-    winget install Notepad++.Notepad++ --source winget --silent
-    winget install 7zip.7zip --source winget --silent
-    winget install ShareX.ShareX --source winget --silent
-    winget install Microsoft.Teams --source winget --silent
-    $(Write-Host "The process is completed, press enter to continue!" -ForegroundColor Cyan -NoNewLine; Read-Host)
+        # Conditional formatting for Latency output
+        if ($AvgLatency -le 1) {
+            Write-Host "Average Latency:     ✅ $AvgLatency ms (Excellent)" -ForegroundColor Green
+        } elseif ($AvgLatency -gt 1 -and $AvgLatency -le 5) {
+            Write-Host "Average Latency:     ✅ $AvgLatency ms (Acceptable)" -ForegroundColor Cyan
+        } elseif ($AvgLatency -gt 5 -and $AvgLatency -le 20) {
+            Write-Host "Average Latency:     ❌ $AvgLatency ms (Poor)" -ForegroundColor Yellow
+        } else {
+            Write-Host "Average Latency:     ❌ $AvgLatency ms (Critical)" -ForegroundColor Red
+        }
+    } else {
+        Write-Host "❌ Failed to ping $TargetIP" -ForegroundColor Red
+    }
 }
 
-#Nervio NAS Section
-function NervioNas {
-    Write-Host "Installing all packages..." -ForegroundColor Red
-    winget install Microsoft.VCRedist.2015+.x64	--source winget --silent
-    winget install Microsoft.VCRedist.2015+.x86	--source winget --silent
-    wsl --install
-    winget install MongoDB.DatabaseTools	--source winget --silent
-    winget install MongoDB.Shell	--source winget --silent
-    winget install MongoDB.Compass.Full	--source winget --silent
-    winget install Docker.DockerDesktop	--source winget --silent
-    $(Write-Host "The process is completed, press enter to continue!" -ForegroundColor Cyan -NoNewLine; Read-Host)    
+function Test-CPUUsage {
+    # Get total CPU usage
+    $CPUUsage = (Get-Counter '\Processor(_Total)\% Processor Time').CounterSamples.CookedValue
+    $CPUUsage = [math]::Round($CPUUsage)
+
+    if ($CPUUsage -gt 75) {
+        Write-Host "`nCPU Usage:           ❌ $CPUUsage% (Above 75%)" -ForegroundColor Red
+    } else {
+        Write-Host "`nCPU Usage:           ✅ $CPUUsage% (Below 75%)" -ForegroundColor Green
+    }
+
+    # Get total CPU time for all active processes
+    $TotalProcessorTime = (Get-Process | Measure-Object -Property CPU -Sum).Sum
+
+    # Get top 5 CPU-consuming processes & their correct percentage of total CPU usage
+    $TopProcesses = Get-Process | Sort-Object CPU -Descending | Select-Object -First 5
+    $ProcessLine = ($TopProcesses | ForEach-Object { 
+        $ProcessUsage = [math]::Round(($_.CPU / $TotalProcessorTime) * $CPUUsage, 2)
+        "$($_.ProcessName): $ProcessUsage%"
+    }) -join " | "
+
+    Write-Host "Top Processes: $ProcessLine" -ForegroundColor Magenta
+}
+
+#Section for Log Performance
+function LogPerformance {
+
+    # 3. User-Inputted IP
+    $UserIP = Read-Host "Enter the Server IP Address"
+    Test-NetworkPing -TargetIP $UserIP
+
+    while ($true) {
+        Test-NetworkPing    # Test default gateway
+        Test-NetworkPing -TargetIP $UserIP
+        Test-CPUUsage
+        Start-Sleep -Seconds 1  # Adjust interval as needed
+    }
 }
 
 # Menu and Loop
 function DisplayMenu {
     while($true) {
         Clear-Host
-        Write-Host "Please run the tool as Administrator!" -ForegroundColor Red
+        Write-Host "PLEASE RUN THE TOOL AS ADMINISTRATOR!" -ForegroundColor Red
         Write-Host ""
-        Write-Host "Lumyns - IT PowerShell Tool [Version: 04.12.2024]" -ForegroundColor Magenta
+        Write-Host "PowerShell Tool [Version: 07.05.2025] ©MarounTannous" -ForegroundColor Magenta
         $pwd = Get-Location
         Write-Host "Working Location: " $pwd -ForegroundColor DarkGray
         Write-Host "----------------------------------" -ForegroundColor DarkGray
-        systeminfo | findstr /B /C:"Host Name" /B /C:"Domain" /B /C:"OS Name" /B /C:"OS Version" /B /C:"System Manufacturer" /B /C:"System Model" /B /C:"System Type" /B /C:"Total Physical Memory" /B /C:"System Locale" /B /C:"Input Locale" /B /C:"Time Zone"
+        systeminfo | findstr /B /C:"Host Name" /B /C:"Domain" /B /C:"OS Version" /B /C:"System Manufacturer" /B /C:"System Model"
+        
+        $OSVersion = (Get-CimInstance Win32_OperatingSystem).Caption
+        if ($OSVersion -match "Windows 10|Windows 11") {
+            Write-Host "OS Name:                   ✅ $OSVersion" -ForegroundColor Green
+        } else {
+            Write-Host "OS Name:                   ❌ $OSVersion" -ForegroundColor Red
+        }
+
+        $SystemLocale = (Get-WinSystemLocale).Name
+        if ($SystemLocale -eq "he-IL") {
+            Write-Host "System Locale (Unicode):   ✅ $SystemLocale" -ForegroundColor Green
+        } else {
+            Write-Host "System Locale (Unicode):   ❌$SystemLocale - Change to Hebrew (Israel)" -ForegroundColor Red
+        }
+
+        # Time Zone (UTC+02:00) Jerusalem
+        $TimeZone = Get-TimeZone
+        if ($TimeZone.Id -eq "Israel Standard Time") {
+            Write-Host "Time Zone:                 ✅ $($TimeZone)" -ForegroundColor Green
+        } else {
+            Write-Host "Time Zone:                 ❌ $($TimeZone) Change to (UTC+02:00) Jerusalem" -ForegroundColor Red
+        }
+
+        # System Type 64x or 32x
+        $SystemType = (Get-CimInstance Win32_ComputerSystem).SystemType
+        if ($SystemType -eq "x64-based PC") {
+            Write-Host "System Type:               ✅ $SystemType" -ForegroundColor Green
+        } else {
+            Write-Host "System Type:               ❌ $SystemType" -ForegroundColor Red
+        }
+
+        # Total Memory
+        $TotalMemory = [int]((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1MB)
+        if ($TotalMemory -lt 8000) {
+            Write-Host "Total Physical Memory:     ❌ $TotalMemory MB (Critical Memory)" -ForegroundColor Red
+        } elseif ($TotalMemory -lt 12000) {
+            Write-Host "Total Physical Memory:     ❌ $TotalMemory MB (Bad Memory)" -ForegroundColor Orange
+        } elseif ($TotalMemory -lt 16000) {
+            Write-Host "Total Physical Memory:     ! $TotalMemory MB (Moderate Memory)" -ForegroundColor Yellow
+        } elseif ($TotalMemory -lt 32000) {
+            Write-Host "Total Physical Memory:     ✅ $TotalMemory MB (Good Memory)" -ForegroundColor Green
+        } else {
+            Write-Host "Total Physical Memory:     ✅ $TotalMemory MB (Very Good Memory)" -ForegroundColor Green
+        }
+
+        $Memory = Get-CimInstance Win32_OperatingSystem
+        $TotalMemory = $Memory.TotalVisibleMemorySize
+        $FreeMemory = $Memory.FreePhysicalMemory
+        $UsedMemoryPercentage = [int]((($TotalMemory - $FreeMemory) / $TotalMemory) * 100)
+
+        if ($UsedMemoryPercentage -gt 75) {
+            Write-Host "Memory usage:              ❌ $UsedMemoryPercentage% (Above 75%)" -ForegroundColor Red
+        } else {
+            Write-Host "Memory usage:              ✅ $UsedMemoryPercentage% (Below 75%)" -ForegroundColor Green
+        }
+
+        $CPU = Get-CimInstance Win32_Processor
+        $CPUUsage = [math]::Round($CPU.LoadPercentage)
+
+        if ($CPUUsage -gt 75) {
+            Write-Host "CPU usage:                 ❌ $CPUUsage% (Above 75%)" -ForegroundColor Red
+        } else {
+            Write-Host "CPU usage:                 ✅ $CPUUsage% (Below 75%)" -ForegroundColor Green
+        }
+
         Write-Host "----------------------------------" -ForegroundColor DarkGray
         Write-Host ""
         Write-Host "General Menu" -ForegroundColor Magenta
@@ -277,12 +373,8 @@ function DisplayMenu {
         Write-Host "[2] System Details - Installed Apps, Printers, Network Adapters, etc..." -ForegroundColor Yellow
         Write-Host "[3] Diagnose Operation System (Network Adapters, Microsoft Store, Disk Cleanup, Windows Updates, etc...)" -ForegroundColor Yellow
         Write-Host "[4] Diagnose Operation System Image Files" -ForegroundColor Yellow
+        Write-Host "[5] Log Performance" -ForegroundColor Yellow
         Write-Host "[0] Exit" -ForegroundColor Yellow
-        Write-Host ""
-        Write-Host "Nervio Menu" -ForegroundColor Magenta
-        Write-Host "----------------------------------" -ForegroundColor DarkGray
-        Write-Host "[nerv-all] Configuration for general workstation." -ForegroundColor Yellow
-        Write-Host "[nerv-nas] Configuration for NAS workstation." -ForegroundColor Yellow
         Write-Host ""
 
         # Prompt for a string input
@@ -297,8 +389,7 @@ function DisplayMenu {
             2 { SystemDetails }
             3 { DiagnoseOperationSystem }
             4 { DiagnoseOperationSystemImage }
-            "nerv-all" { NervioAll }
-            "nerv-nas" { NervioNas }
+            5 { LogPerformance }
             #default { "You entered nothing." } 
         }
     }
