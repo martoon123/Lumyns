@@ -227,7 +227,7 @@ function Test-NetworkPing {
 
     $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     $TestMessage = "$Timestamp - Testing connection to: $TargetIP"
-    Write-Host $TestMessage
+    Write-Host $TestMessage -ForegroundColor Magenta
     $LogMessages += $TestMessage
 
     $PingResult = Test-Connection -ComputerName $TargetIP -Count $PingCount -BufferSize $MaxPacketSize -ErrorAction SilentlyContinue
@@ -240,10 +240,10 @@ function Test-NetworkPing {
         # Conditional formatting for Packet Loss output
         $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
         if ($LostPackets -gt 0) {
-            $PacketMessage = "$Timestamp - Packet Loss: ❌ $LostPackets out of $PingCount"
+            $PacketMessage = "$Timestamp - Packet Loss: 		❌ $LostPackets out of $PingCount"
             Write-Host $PacketMessage -ForegroundColor Red
         } else {
-            $PacketMessage = "$Timestamp - Packet Loss: ✅ $LostPackets out of $PingCount"
+            $PacketMessage = "$Timestamp - Packet Loss: 		✅ $LostPackets out of $PingCount"
             Write-Host $PacketMessage -ForegroundColor Green
         }
         $LogMessages += $PacketMessage
@@ -251,16 +251,16 @@ function Test-NetworkPing {
         # Conditional formatting for Latency output
         $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
         if ($AvgLatency -le 1) {
-            $LatencyMessage = "$Timestamp - Average Latency: ✅ $AvgLatency ms (Excellent)"
+            $LatencyMessage = "$Timestamp - Average Latency:		✅  $AvgLatency ms (Excellent)"
             Write-Host $LatencyMessage -ForegroundColor Green
         } elseif ($AvgLatency -gt 1 -and $AvgLatency -le 5) {
-            $LatencyMessage = "$Timestamp - Average Latency: ✅ $AvgLatency ms (Acceptable)"
+            $LatencyMessage = "$Timestamp - Average Latency:		⚠️ $AvgLatency ms (Acceptable)"
             Write-Host $LatencyMessage -ForegroundColor Cyan
         } elseif ($AvgLatency -gt 5 -and $AvgLatency -le 20) {
-            $LatencyMessage = "$Timestamp - Average Latency: ❌ $AvgLatency ms (Poor)"
+            $LatencyMessage = "$Timestamp - Average Latency:		📉 ️ $AvgLatency ms (Poor)"
             Write-Host $LatencyMessage -ForegroundColor Yellow
         } else {
-            $LatencyMessage = "$Timestamp - Average Latency: ❌ $AvgLatency ms (Critical)"
+            $LatencyMessage = "$Timestamp - Average Latency:		❌  $AvgLatency ms (Critical)"
             Write-Host $LatencyMessage -ForegroundColor Red
         }
         $LogMessages += $LatencyMessage
@@ -275,61 +275,70 @@ function Test-NetworkPing {
     $LogMessages | Out-File -Append -FilePath $LogFile
 }
 
-function Test-CPUUsage {
+function Test-SystemUsage {
     # Define log file path in the same location as the script
-    $LogFile = "$PSScriptRoot\cpu_usage_log.txt"
-
+    $LogFile = "$PSScriptRoot\system_usage_log.txt"
     $LogMessages = @()
 
     # Get timestamp
     $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+	
+	# Print Testing System Usage Message
+    Write-Host "$Timestamp - Testing System Usage" -ForegroundColor Magenta
+    
+	# === Memory Usage ===
+    $Memory = Get-CimInstance Win32_OperatingSystem
+    $TotalMemory = $Memory.TotalVisibleMemorySize
+    $FreeMemory = $Memory.FreePhysicalMemory
+	$UsedMemoryPercentage = [int]((($TotalMemory - $FreeMemory) / $TotalMemory) * 100)
+	
+    if ($UsedMemoryPercentage -gt 75) {
+        $MemoryMessage = "$Timestamp - Memory Usage: 		❌ $UsedMemoryPercentage% (Above 75%)"
+        Write-Host $MemoryMessage -ForegroundColor Red
+    } else {
+        $MemoryMessage = "$Timestamp - Memory Usage: 		✅ $UsedMemoryPercentage% (Below 75%)"
+        Write-Host $MemoryMessage -ForegroundColor Green
+    }
+    $LogMessages += $MemoryMessage
 
-    # Get total CPU usage
+    # === CPU Usage ===
     $CPUUsage = (Get-Counter '\Processor(_Total)\% Processor Time').CounterSamples.CookedValue
     $CPUUsage = [math]::Round($CPUUsage)
 
-    # Format CPU usage message with timestamp
     if ($CPUUsage -gt 75) {
-        $CpuMessage = "$Timestamp - CPU Usage: ❌ $CPUUsage% (Above 75%)"
+        $CpuMessage = "$Timestamp - CPU Usage: 		❌ $CPUUsage% (Above 75%)"
         Write-Host $CpuMessage -ForegroundColor Red
     } else {
-        $CpuMessage = "$Timestamp - CPU Usage: ✅ $CPUUsage% (Below 75%)"
+        $CpuMessage = "$Timestamp - CPU Usage: 		✅ $CPUUsage% (Below 75%)"
         Write-Host $CpuMessage -ForegroundColor Green
     }
     $LogMessages += $CpuMessage
 
-    # Get total CPU time for all active processes
+    # Top CPU-consuming processes
     $TotalProcessorTime = (Get-Process | Measure-Object -Property CPU -Sum).Sum
-
-    # Get top 5 CPU-consuming processes & their correct percentage of total CPU usage
     $TopProcesses = Get-Process | Sort-Object CPU -Descending | Select-Object -First 5
     $ProcessLine = ($TopProcesses | ForEach-Object { 
         $ProcessUsage = [math]::Round(($_.CPU / $TotalProcessorTime) * $CPUUsage, 2)
         "$($_.ProcessName): $ProcessUsage%"
     }) -join " | "
-
-    # Add timestamp to process message
-    $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    $ProcessMessage = "$Timestamp - Top Processes: $ProcessLine"
-    Write-Host $ProcessMessage -ForegroundColor Magenta
+    $ProcessMessage = "$Timestamp - CPU Processes: 		$ProcessLine"
+    Write-Host $ProcessMessage
     $LogMessages += $ProcessMessage
 
-    # Save all messages to the log file in the same folder as the script
+    # Save all messages to the log file
     $LogMessages | Out-File -Append -FilePath $LogFile
 }
 
 #Section for Log Performance
 function LogPerformance {
-
-    # 3. User-Inputted IP
+    # Inputted IP
     $UserIP = $(Write-Host "Enter the Server IP Address: " -ForegroundColor Green -NoNewLine; Read-Host)
-
-    Test-NetworkPing -TargetIP $UserIP
 
     while ($true) {
         Test-NetworkPing    # Test default gateway
         Test-NetworkPing -TargetIP $UserIP
-        Test-CPUUsage
+        Test-SystemUsage
+        Write-Host ""
         #Start-Sleep -Seconds 1  # Adjust interval as needed
     }
 }
@@ -340,7 +349,7 @@ function DisplayMenu {
         Clear-Host
         Write-Host "PLEASE RUN THE TOOL AS ADMINISTRATOR!" -ForegroundColor Red
         Write-Host ""
-        Write-Host "PowerShell Tool [Version: 07.05.2025] ©MarounTannous" -ForegroundColor Magenta
+        Write-Host "PowerShell Tool [Version: 19.05.2025] ©LiadSmart" -ForegroundColor Magenta
         $pwd = Get-Location
         Write-Host "Working Location: " $pwd -ForegroundColor DarkGray
         Write-Host "----------------------------------" -ForegroundColor DarkGray
@@ -381,7 +390,7 @@ function DisplayMenu {
         if ($TotalMemory -lt 8000) {
             Write-Host "Total Physical Memory:     ❌ $TotalMemory MB (Critical Memory)" -ForegroundColor Red
         } elseif ($TotalMemory -lt 12000) {
-            Write-Host "Total Physical Memory:     ❌ $TotalMemory MB (Bad Memory)" -ForegroundColor Orange
+            Write-Host "Total Physical Memory:     ⚠️ $TotalMemory MB (Bad Memory)" -ForegroundColor Orange
         } elseif ($TotalMemory -lt 16000) {
             Write-Host "Total Physical Memory:     ! $TotalMemory MB (Moderate Memory)" -ForegroundColor Yellow
         } elseif ($TotalMemory -lt 32000) {
@@ -390,24 +399,24 @@ function DisplayMenu {
             Write-Host "Total Physical Memory:     ✅ $TotalMemory MB (Very Good Memory)" -ForegroundColor Green
         }
 
+		# Memory Usage
         $Memory = Get-CimInstance Win32_OperatingSystem
         $TotalMemory = $Memory.TotalVisibleMemorySize
         $FreeMemory = $Memory.FreePhysicalMemory
         $UsedMemoryPercentage = [int]((($TotalMemory - $FreeMemory) / $TotalMemory) * 100)
-
         if ($UsedMemoryPercentage -gt 75) {
-            Write-Host "Memory usage:              ❌ $UsedMemoryPercentage% (Above 75%)" -ForegroundColor Red
+            Write-Host "Memory Usage:              ❌ $UsedMemoryPercentage% (Above 75%)" -ForegroundColor Red
         } else {
-            Write-Host "Memory usage:              ✅ $UsedMemoryPercentage% (Below 75%)" -ForegroundColor Green
+            Write-Host "Memory Usage:              ✅ $UsedMemoryPercentage% (Below 75%)" -ForegroundColor Green
         }
 
+		# CPU Usage
         $CPU = Get-CimInstance Win32_Processor
         $CPUUsage = [math]::Round($CPU.LoadPercentage)
-
         if ($CPUUsage -gt 75) {
-            Write-Host "CPU usage:                 ❌ $CPUUsage% (Above 75%)" -ForegroundColor Red
+            Write-Host "CPU Usage:                 ❌ $CPUUsage% (Above 75%)" -ForegroundColor Red
         } else {
-            Write-Host "CPU usage:                 ✅ $CPUUsage% (Below 75%)" -ForegroundColor Green
+            Write-Host "CPU Usage:                 ✅ $CPUUsage% (Below 75%)" -ForegroundColor Green
         }
 
         Write-Host "----------------------------------" -ForegroundColor DarkGray
